@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import api from "./api/axios";
+import { getAPIData } from "./api/axios";
 import "./app.css";
 import Loading from "./components/Loading/Loading";
 import searchIcon from "./images/icon_search.svg";
@@ -13,33 +13,24 @@ function App() {
   const [search, setSearch] = useState(false);
   const [city, setCity] = useState("seoul");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // Read Data
-      try {
-        const res = await api.get(
-          `/weather?q=${city}&appid=${process.env.REACT_APP_API_KEY}`
-        );
-        setData(res.data);
-        setMain(res.data.main);
-        setLocation({
-          city: res.data.name,
-          country: res.data.sys.country,
-        });
-        setWeatherInfo(res.data.weather[0]);
-      } catch (err) {
-        if (err.response) {
-          // 응답코드 2xx가 아닌 경우
-          console.log(err.response.data);
-          console.log(err.response.status);
-          console.log(err.response.headers);
-        } else {
-          console.log(`Error: ${err.message}`);
-        }
-      }
-    };
+  const APIKeyword = {
+    city,
+    key: process.env.REACT_APP_API_KEY,
+  };
 
-    fetchData();
+  const fetchData = async () => await getAPIData(APIKeyword);
+
+  useEffect(() => {
+    fetchData().then((res) => {
+      console.log(res);
+      setData(res.data);
+      setMain(res.data.main);
+      setLocation({
+        city: res.data.name,
+        country: res.data.sys.country,
+      });
+      setWeatherInfo(res.data.weather[0]);
+    });
   }, [city]);
 
   console.log(city);
